@@ -1,0 +1,226 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - createagent.py
+      - requirements.txt
+      - cicd/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  pythonVersion: '3.11'
+  # Global variables - Add these as pipeline variables or variable group
+  # - AZURE_CLIENT_ID
+  # - AZURE_TENANT_ID
+  # - AZURE_SUBSCRIPTION_ID
+
+stages:
+  # ================================================================================
+  # BUILD STAGE
+  # ================================================================================
+  - stage: Build
+    displayName: 'Build and Validate'
+    jobs:
+      - job: ValidatePython
+        displayName: 'Validate Python Code'
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Set Python Version'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              addToPath: true
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: 'Install Dependencies'
+
+          - script: |
+              python -m py_compile createagent.py
+            displayName: 'Validate Python Syntax'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Artifacts'
+            inputs:
+              targetPath: '$(Build.SourcesDirectory)'
+              artifact: 'agent-scripts'
+              publishLocation: 'pipeline'
+
+  # ================================================================================
+  # DEV ENVIRONMENT
+  # ================================================================================
+  - stage: Dev
+    displayName: 'Deploy to Dev'
+    dependsOn: Build
+    condition: succeeded()
+    variables:
+      - group: 'agent-dev-vars'
+    jobs:
+      - deployment: DeployAgentDev
+        displayName: 'Deploy Agent to Dev'
+        environment: 'dev'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Artifacts'
+                  inputs:
+                    artifact: 'agent-scripts'
+                    path: '$(Pipeline.Workspace)/agent-scripts'
+
+                - task: UsePythonVersion@0
+                  displayName: 'Set Python Version'
+                  inputs:
+                    versionSpec: '$(pythonVersion)'
+                    addToPath: true
+
+                - script: |
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                  displayName: 'Install Dependencies'
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy Agent in Dev'
+                  inputs:
+                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_DEV)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      export AZURE_AI_PROJECT="$(AZURE_AI_PROJECT_DEV)"
+                      export AZURE_SUBSCRIPTION_ID="$(AZURE_SUBSCRIPTION_ID)"
+                      export AZURE_TENANT_ID="$(AZURE_TENANT_ID)"
+                      export AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)"
+                      
+                      echo "Deploying agent in DEV environment..."
+                      python createagent.py
+                    addSpnToEnvironment: true
+
+                - script: |
+                    echo "Dev deployment completed successfully"
+                  displayName: 'Deployment Complete'
+
+  # ================================================================================
+  # TEST ENVIRONMENT
+  # ================================================================================
+  - stage: Test
+    displayName: 'Deploy to Test'
+    dependsOn: Dev
+    condition: succeeded()
+    variables:
+      - group: 'agent-test-vars'
+    jobs:
+      - deployment: DeployAgentTest
+        displayName: 'Deploy Agent to Test'
+        environment: 'test'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Artifacts'
+                  inputs:
+                    artifact: 'agent-scripts'
+                    path: '$(Pipeline.Workspace)/agent-scripts'
+
+                - task: UsePythonVersion@0
+                  displayName: 'Set Python Version'
+                  inputs:
+                    versionSpec: '$(pythonVersion)'
+                    addToPath: true
+
+                - script: |
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                  displayName: 'Install Dependencies'
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy Agent in Test'
+                  inputs:
+                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_TEST)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      export AZURE_AI_PROJECT="$(AZURE_AI_PROJECT_TEST)"
+                      export AZURE_SUBSCRIPTION_ID="$(AZURE_SUBSCRIPTION_ID)"
+                      export AZURE_TENANT_ID="$(AZURE_TENANT_ID)"
+                      export AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)"
+                      
+                      echo "Deploying agent in TEST environment..."
+                      python createagent.py
+                    addSpnToEnvironment: true
+
+                - script: |
+                    echo "Test deployment completed successfully"
+                  displayName: 'Deployment Complete'
+
+  # ================================================================================
+  # PROD ENVIRONMENT
+  # ================================================================================
+  - stage: Prod
+    displayName: 'Deploy to Production'
+    dependsOn: Test
+    condition: succeeded()
+    variables:
+      - group: 'agent-prod-vars'
+    jobs:
+      - deployment: DeployAgentProd
+        displayName: 'Deploy Agent to Production'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Artifacts'
+                  inputs:
+                    artifact: 'agent-scripts'
+                    path: '$(Pipeline.Workspace)/agent-scripts'
+
+                - task: UsePythonVersion@0
+                  displayName: 'Set Python Version'
+                  inputs:
+                    versionSpec: '$(pythonVersion)'
+                    addToPath: true
+
+                - script: |
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                  displayName: 'Install Dependencies'
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy Agent in Production'
+                  inputs:
+                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_PROD)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      export AZURE_AI_PROJECT="$(AZURE_AI_PROJECT_PROD)"
+                      export AZURE_SUBSCRIPTION_ID="$(AZURE_SUBSCRIPTION_ID)"
+                      export AZURE_TENANT_ID="$(AZURE_TENANT_ID)"
+                      export AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)"
+                      
+                      echo "Deploying agent in PRODUCTION environment..."
+                      python createagent.py
+                    addSpnToEnvironment: true
+
+                - script: |
+                    echo "=============================================="
+                    echo "PRODUCTION DEPLOYMENT COMPLETED SUCCESSFULLY"
+                    echo "=============================================="
+                    echo "Agent deployed at: $(date)"
+                    echo "Environment: Production"
+                    echo "Pipeline: $(Build.DefinitionName)"
+                    echo "Build: $(Build.BuildNumber)"
+                  displayName: 'Deployment Summary'
