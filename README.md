@@ -1,4 +1,4 @@
-# foundrycicdbasic
+# Microsoft Agent Framework with Microsoft Foundry CI/CD
 
 Agent framework and Microsoft Foundry CI/CD using basic
 
@@ -24,3 +24,18 @@ Agent framework and Microsoft Foundry CI/CD using basic
 - exagent.py: Uses an existing agent created in the previous step to answer a weather-related question.
 - agenteval.py: Evaluates the performance of the existing agent in real-time using the Azure
 - Redteam.py: Performs red teaming on the existing agent to test its robustness against adversarial prompts.
+
+### Azure DevOps Pipeline
+
+https://github.com/balakreshnan/foundrycicdbasic/blob/main/cicd/README.md
+
+### Github Actions
+
+https://github.com/balakreshnan/foundrycicdbasic/blob/main/.github/workflows/README.md
+
+## Conclusion
+
+- This is a basic example of how to create, deploy, use, evaluate, and red team an agent using the Microsoft Agent Framework and Microsoft Foundry CI/CD.
+- Usually the agent creation will be more complex and involve more sophisticated logic and integrations.
+- Agent creation will be separate deployment.
+- Agent usage or consumption will be part of application that is consuming the agent.
