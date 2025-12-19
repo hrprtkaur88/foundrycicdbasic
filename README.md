@@ -25,6 +25,8 @@ Agent framework and Microsoft Foundry CI/CD using basic
 - agenteval.py: Evaluates the performance of the existing agent in real-time using the Azure
 - Redteam.py: Performs red teaming on the existing agent to test its robustness against adversarial prompts.
 
+  https://medium.com/gopenai/microsoft-foundry-agent-ops-agentops-9bb9304d2a0c
+
 ### Azure DevOps Pipeline
 
 https://github.com/balakreshnan/foundrycicdbasic/blob/main/cicd/README.md
