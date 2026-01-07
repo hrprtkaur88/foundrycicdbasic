@@ -31,7 +31,7 @@ from azure.ai.projects.models._models import PromptAgentDefinition
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import (
-    AgentVersionDetails,
+    #AgentVersionDetails,
     EvaluationTaxonomy,
     AzureAIAgentTarget,
     AgentTaxonomyInput,
@@ -116,7 +116,7 @@ def main() -> None:
                 "item_generation_params": {
                     "type": "red_team_taxonomy",
                     "attack_strategies": ["Flip", "Base64"],
-                    "num_turns": 5,
+                    "num_turns": 1,
                     "source": {"type": "file_id", "id": taxonomy.id},
                 },
                 "target": target.as_dict(),
@@ -147,14 +147,14 @@ def main() -> None:
             time.sleep(5)
             print(f"Waiting for eval run to complete... {run.status}")
 
-        client.evals.delete(eval_id=eval_object.id)
-        print("Evaluation deleted")
+        #client.evals.delete(eval_id=eval_object.id)
+        #print("Evaluation deleted")
 
-        project_client.agents.delete(agent_name=agent_name)
-        print("Agent deleted")
+        #project_client.agents.delete(agent_name=agent_name)
+        #print("Agent deleted")
 
 
-def _get_tool_descriptions(agent: AgentVersionDetails):
+def _get_tool_descriptions(agent: AgentVersionObject):
     tools = agent.definition.get("tools", [])
     tool_descriptions = []
     for tool in tools:
