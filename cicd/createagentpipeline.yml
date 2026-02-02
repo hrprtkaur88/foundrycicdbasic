@@ -90,7 +90,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: 'Deploy Agent in Dev'
                   inputs:
-                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_DEV)'
+                    azureSubscription: 'AZURE_SERVICE_CONNECTION_DEV'
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
@@ -146,7 +146,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: 'Deploy Agent in Test'
                   inputs:
-                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_TEST)'
+                    azureSubscription: 'AZURE_SERVICE_CONNECTION_TEST'
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
@@ -202,7 +202,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: 'Deploy Agent in Production'
                   inputs:
-                    azureSubscription: '$(AZURE_SERVICE_CONNECTION_PROD)'
+                    azureSubscription: 'AZURE_SERVICE_CONNECTION_PROD'
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
