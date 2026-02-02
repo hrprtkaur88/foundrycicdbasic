@@ -2,7 +2,7 @@ import re
 from azure.identity import DefaultAzureCredential
 #from azure.ai.projects import AIProjectClient
 from agent_framework.azure import AzureAIClient
-from agent_framework.observability import get_tracer, setup_observability
+from agent_framework.observability import get_tracer, configure_otel_providers
 import os
 from dotenv import load_dotenv
 from opentelemetry.trace import SpanKind
@@ -14,10 +14,10 @@ load_dotenv()
 myEndpoint = os.getenv("AZURE_AI_PROJECT")
 
 async def createagent():
-    setup_observability()
+    configure_otel_providers()
     credential = DefaultAzureCredential()
 
-    myAgent = "cicdagenttest"
+    myAgent = "cicdagenttest1"
     with get_tracer().start_as_current_span("cicdagenttest", kind=SpanKind.CLIENT) as current_span:
         print(f"Trace ID: {format_trace_id(current_span.get_span_context().trace_id)}")
         # Create a new agent

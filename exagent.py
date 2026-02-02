@@ -5,21 +5,22 @@
 import re
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
-from agent_framework.observability import get_tracer, setup_observability
+from agent_framework.observability import get_tracer, enable_instrumentation
 import os
 from dotenv import load_dotenv
 from opentelemetry.trace import SpanKind
 from opentelemetry.trace.span import format_trace_id
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)  # Force override existing env vars
 
 myEndpoint = os.getenv("AZURE_AI_PROJECT")
+print(f"Using endpoint: {myEndpoint}")
 
 
 
 def existingagent():
-    setup_observability()
+    enable_instrumentation()
     project_client = AIProjectClient(
         endpoint=myEndpoint,
         credential=DefaultAzureCredential(),
